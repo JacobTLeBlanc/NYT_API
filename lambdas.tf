@@ -68,8 +68,8 @@ data "aws_iam_policy_document" "get_best_sellers_policy_document" {
     ]
 
     resources = [
-      aws_cloudwatch_log_group.get_best_sellers_log_group,
-      "${aws_cloudwatch_log_group.get_best_sellers_log_group}*"
+      aws_cloudwatch_log_group.get_best_sellers_log_group.arn,
+      "${aws_cloudwatch_log_group.get_best_sellers_log_group.arn}*"
     ]
   }
 }
