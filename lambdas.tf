@@ -50,7 +50,7 @@ resource "aws_lambda_function" "get_best_sellers_nyt" {
 }
 
 resource "aws_cloudwatch_log_group" "get_best_sellers_log_group" {
-  name = "/aws/lambda/${aws_lambda_function.get_best_sellers_nyt}"
+  name = "/aws/lambda/${aws_lambda_function.get_best_sellers_nyt.function_name}"
 
   retention_in_days = var.log_retention_in_days
 }
