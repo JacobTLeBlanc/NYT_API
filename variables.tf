@@ -4,6 +4,11 @@ variable "region" {
   description = "AWS region"
 }
 
+variable "account_id" {
+  type        = number
+  description = "AWS Account ID"
+}
+
 variable "nyt_api_key" {
   type        = string
   description = "Key to access NYT api"
