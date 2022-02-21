@@ -36,7 +36,7 @@ data "archive_file" "get_best_sellers_archive_file" {
 resource "aws_lambda_function" "get_best_sellers_nyt" {
   filename = "${local.best_sellers_name}.zip"
   function_name = local.best_sellers_name
-  handler = "${aws_iam_role.get_best_sellers_role.arn}.lambda_handler"
+  handler = "${local.best_sellers_name}.lambda_handler"
   role = aws_iam_role.get_best_sellers_role.arn
 
   environment {
