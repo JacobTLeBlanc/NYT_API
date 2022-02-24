@@ -153,3 +153,12 @@ resource "aws_iam_role_policy" "get_categories_role_policy" {
   policy = data.aws_iam_policy_document.get_categories_policy_document.json
   role   = aws_iam_role.get_categories_role.id
 }
+
+resource "aws_lambda_permission" "apigw_get_best_sellers" {
+  statement_id  = "AllowExecutionFromAPIGatewayGetBestSellers"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.get_best_sellers_nyt.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.nyt.id}/*/${aws_api_gateway_method.get_categories_method.http_method}${aws_api_gateway_resource.get_categories_resource.path}"
+}
