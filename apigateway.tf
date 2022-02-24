@@ -74,7 +74,11 @@ resource "aws_api_gateway_deployment" "nyt_deployment" {
   rest_api_id = aws_api_gateway_rest_api.nyt.id
 
   triggers = {
-    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.nyt.body))
+    redeployment = sha1(jsonencode([
+      aws_api_gateway_rest_api.nyt.body,
+      aws_api_gateway_integration.get_best_sellers_integration.id,
+      aws_api_gateway_integration.get_categories_integration.id
+    ]))
   }
 
   lifecycle {
