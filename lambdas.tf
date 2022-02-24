@@ -87,3 +87,69 @@ resource "aws_lambda_permission" "apigw_get_best_sellers" {
 
   source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.nyt.id}/*/${aws_api_gateway_method.get_best_sellers_method.http_method}${aws_api_gateway_resource.get_best_sellers_category_resource.path}"
 }
+
+#####################
+# Get Categories Lambda
+
+resource "aws_iam_role" "get_categories_role" {
+  name = "CategoriesNYTRole"
+
+  assume_role_policy = data.aws_iam_policy_document.assume_role_lambda_policy.json
+}
+
+locals {
+  categories_name = "get_categories_nyt"
+}
+
+data "archive_file" "get_categories_archive_file" {
+  type = "zip"
+
+  source_file = "${path.module}/lambdas/${local.categories_name}.py"
+  output_path = "${path.module}/${local.categories_name}.zip"
+}
+
+resource "aws_lambda_function" "get_categories_nyt" {
+  filename = "${local.categories_name}.zip"
+  function_name = local.categories_name
+  handler = "${local.categories_name}.lambda_handler"
+  role = aws_iam_role.get_categories_role.arn
+
+  environment {
+    variables = {
+      KEY = var.nyt_api_key
+    }
+  }
+
+  runtime = "python3.9"
+  source_code_hash = data.archive_file.get_categories_archive_file.output_base64sha256
+}
+
+resource "aws_cloudwatch_log_group" "get_categories_log_group" {
+  name = "/aws/lambda/${aws_lambda_function.get_categories_nyt.function_name}"
+
+  retention_in_days = var.log_retention_in_days
+}
+
+data "aws_iam_policy_document" "get_categories_policy_document" {
+  statement {
+    sid = "GetCategoriesPolicy"
+
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+
+    resources = [
+      aws_cloudwatch_log_group.get_categories_log_group.arn,
+      "${aws_cloudwatch_log_group.get_categories_log_group.arn}*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "get_categories_role_policy" {
+  policy = data.aws_iam_policy_document.get_categories_policy_document.json
+  role   = aws_iam_role.get_categories_role.id
+}
